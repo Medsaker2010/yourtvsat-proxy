@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner YourTVSat Pro</title>
+    <style>
+        body { background: #000; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; }
+        .container { max-width: 450px; margin: 50px auto; border: 2px solid #d4af37; padding: 30px; border-radius: 15px; background: #111; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        h1 { text-transform: uppercase; letter-spacing: 2px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; }
+        input:focus { border-color: #d4af37; }
+        button { background: #d4af37; color: #000; border: none; padding: 15px; width: 95%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 15px; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: #fff; box-shadow: 0 0 10px #d4af37; }
+        #res { margin-top: 25px; font-weight: bold; padding: 10px; border-radius: 5px; min-height: 40px; }
+        .ok { color: #00ff00; border: 1px solid #00ff00; }
+        .err { color: #ff0000; border: 1px solid #ff0000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ATLAS PRO OFFICIEL</h1>
+        <p>Scanner de Test YourTVSat</p>
+        <input type="text" id="host" placeholder="URL Serveur (ex: http://iptv.com)">
+        <input type="text" id="port" placeholder="Port (ex: 8080)">
+        <input type="text" id="user" placeholder="Nom d'utilisateur">
+        <input type="text" id="pass" placeholder="Mot de passe">
+        <button onclick="tester()">VÉRIFIER L'ABONNEMENT</button>
+        <div id="res">En attente de scan...</div>
+    </div>
+
+    <script>
+        async function tester() {
+            const resDiv = document.getElementById('res');
+            const h = document.getElementById('host').value;
+            const p = document.getElementById('port').value;
+            const u = document.getElementById('user').value;
+            const pw = document.getElementById('pass').value;
+
+            if(!h || !u || !pw) { alert("Remplis tous les champs !"); return; }
+
+            resDiv.innerHTML = "Vérification en cours...";
+            resDiv.className = "";
+
+            // Appel au proxy pour éviter les blocages de sécurité
+            const url = `/api/proxy?host=${encodeURIComponent(h)}&port=${p || '80'}&user=${u}&pass=${pw}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if(data.auth === 1) {
+                    resDiv.innerHTML = "✅ VALIDE !<br>Expire le : " + data.expiry;
+                    resDiv.className = "ok";
+                } else {
+                    resDiv.innerHTML = "❌ IDENTIFIANTS INCORRECTS";
+                    resDiv.className = "err";
+                }
+            } catch (e) {
+                resDiv.innerHTML = "⚠️ ERREUR : Serveur IPTV injoignable";
+                resDiv.className = "err";
+            }
+        }
+    </script>
+</body>
+</html>
