@@ -1,1 +1,119 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YourTVSat - Scanner Pro</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #d4af37; /* Or luxueux */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            border: 2px solid #d4af37;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+        h1 { font-size: 2em; text-transform: uppercase; letter-spacing: 3px; }
+        .logo { width: 150px; margin-bottom: 20px; }
+        
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: #d4af37;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        button:hover { background: #fff; box-shadow: 0 0 15px #d4af37; }
+        
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid #333;
+            min-height: 50px;
+        }
+        .status-ok { color: #00ff00; }
+        .status-err { color: #ff0000; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Atlas Pro Officiel</h1>
+            <p>YourTVSat Subscription Scanner</p>
+        </div>
+
+        <div id="scanner-form">
+            <input type="text" id="host" placeholder="URL du serveur (ex: http://nom-dns.com)">
+            <input type="text" id="port" placeholder="Port (ex: 8080)">
+            <input type="text" id="user" placeholder="Nom d'utilisateur">
+            <input type="text" id="pass" placeholder="Mot de passe">
+            <br><br>
+            <button onclick="testServer()">Lancer le Test</button>
+        </div>
+
+        <div id="results">
+            <p>En attente de test...</p>
+        </div>
+    </div>
+
+    <script>
+        async function testServer() {
+            const host = document.getElementById('host').value;
+            const port = document.getElementById('port').value;
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const results = document.getElementById('results');
+
+            if(!host || !user || !pass) {
+                alert("Veuillez remplir tous les champs !");
+                return;
+            }
+
+            results.innerHTML = "<p>Connexion au serveur en cours...</p>";
+
+            // Construction de l'URL de test Xtream Codes
+            const testUrl = `${host}:${port}/player_api.php?username=${user}&password=${pass}`;
+
+            try {
+                // Note: Les tests directs peuvent être bloqués par le CORS en navigateur
+                // Pour un test réel, on passe souvent par un proxy backend.
+                const response = await fetch(testUrl);
+                const data = await response.json();
+
+                if(data.user_info && data.user_info.auth === 1) {
+                    results.innerHTML = `<p class="status-ok">✅ Succès ! Expire le : ${new Date(data.user_info.exp_date * 1000).toLocaleDateString()}</p>`;
+                } else {
+                    results.innerHTML = `<p class="status-err">❌ Identifiants incorrects ou serveur injoignable.</p>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<p class="status-err">⚠️ Erreur de connexion (Vérifiez l'URL ou le CORS).</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
